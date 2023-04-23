@@ -1,0 +1,113 @@
+1. Explain what the simple List component does.
+
+Ans. The List component displays a list of items. It receives an array of items as props, and for each item, it renders a SingleListItem component. 
+     The SingleListItem component represents a single item in the list, and it has a selected state that changes when it is clicked. 
+     When an item is clicked, the handleClick function is called, which sets the selectedIndex state to the index of the clicked item, and the 
+     isSelected state of the SingleListItem component is set to true if the index of the component matches the selectedIndex state.
+
+
+
+
+
+2. Problems/warnings with the code:
+
+Ans. 1. The setSelectedIndex function is not correctly destructured from useState.
+     const [setSelectedIndex, selectedIndex] = useState(); ----> wrong 
+     const [selectedIndex, setSelectedIndex] = useState(); ----> right
+     
+     2. The prop types for the items prop in WrappedListComponent are incorrect
+     
+     wrong :
+     
+     items: PropTypes.array(PropTypes.shapeOf({
+     text: PropTypes.string.isRequired,
+     })),
+     
+     right : 
+     
+     items: PropTypes.arrayOf(PropTypes.shape({
+     text: PropTypes.string.isRequired,
+     })),
+     
+
+    3. The onClickHandler prop passed to the SingleListItem component is not correctly defined.
+       onClickHandler={() => handleClick(index)} ---> wrong
+  
+       onClickHandler={handleClick} ---> right
+       
+       
+    4. The isSelected prop passed to the SingleListItem component is not correctly defined. 
+        isSelected={selectedIndex} ----> wrong 
+        
+        isSelected={selectedIndex === index} -----> right 
+        
+        
+        
+        
+        
+        
+        
+        
+3. Please fix, optimize, and/or modify the component as much as you think is necessary.
+Ans.    
+
+
+        import React, { useState, useCallback, memo } from 'react';
+        import PropTypes from 'prop-types';
+
+        const SingleListItem = memo(({ index, isSelected, onClickHandler, text }) => {
+          return (
+            <li
+              style={{ backgroundColor: isSelected ? 'green' : 'red' }}
+              onClick={() => onClickHandler(index)}
+            >
+              {text}
+            </li>
+          );
+        });
+
+        SingleListItem.propTypes = {
+          index: PropTypes.number.isRequired,
+          isSelected: PropTypes.bool.isRequired,
+          onClickHandler: PropTypes.func.isRequired,
+          text: PropTypes.string.isRequired,
+        };
+
+        const List = memo(({ items }) => {
+          const [selectedIndex, setSelectedIndex] = useState(null);
+
+          const handleClick = useCallback((index) => {
+            setSelectedIndex(index);
+          }, []);
+
+          return (
+            <ul style={{ textAlign: 'left' }}>
+              {items?.map((item, index) => (
+                <SingleListItem
+                  key={item.text}
+                  onClickHandler={handleClick}
+                  text={item.text}
+                  index={index}
+                  isSelected={selectedIndex === index}
+                />
+              ))}
+            </ul>
+          );
+        });
+
+        List.propTypes = {
+          items: PropTypes.arrayOf(
+            PropTypes.shape({
+              text: PropTypes.string.isRequired,
+            })
+          ),
+        };
+
+        List.defaultProps = {
+          items: null,
+        };
+
+        export default List;
+
+
+
